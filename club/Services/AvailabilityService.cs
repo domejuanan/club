@@ -48,10 +48,9 @@ namespace club.Services
 
             DateTime dateTime = default;
 
-            if (!String.IsNullOrWhiteSpace(dateString) && !DateTime.TryParse(dateString, out dateTime))
-            {
+            if (!String.IsNullOrWhiteSpace(dateString) && !DateTime.TryParse(dateString, out dateTime))            
                 return new CourtAvailableListResponse(400, "Wrong date format", "date", "Date format has to be: yyyy-MM-dd");
-            }
+            
 
             if (dateTime < DateTime.Today)
                 return new CourtAvailableListResponse(400, "Bad booking time", "date", "Date is older than today");
@@ -70,8 +69,7 @@ namespace club.Services
 
             var hoursByCourt = todayBookings.GroupBy(b => b.CourtId)
                 .ToDictionary(k => k.Key, v => v.Select(f => f.Reservation.ToString("HH:mm")).ToList());
-
-            
+                        
             var allCourts = await _courtRepository.ListAsync(pageNum, pageSize);
             var resources = _mapper.Map<IEnumerable<Court>, IEnumerable<CourtAvailableResource>>(allCourts);
 

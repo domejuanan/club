@@ -74,7 +74,6 @@ namespace club.Controllers
         /// <returns>Response for the request.</returns>
         [AllowAnonymous]
         [HttpPost]
-        [HttpPost("register")]
         [ProducesResponseType(typeof(UserResource), 201)]
         [ProducesResponseType(typeof(ErrorResource), 400)]                
         public async Task<IActionResult> Register([FromBody]UserSaveResource userSaveResource)

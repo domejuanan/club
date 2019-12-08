@@ -2,7 +2,7 @@ using club.Resources;
 
 namespace club.Responses
 {
-    public class CourtListResponse : BaseListResponse<CourtListResource>
+    public class CourtListResponse : BaseResponse<CourtListResource>
     {      
         public CourtListResponse(CourtListResource resource) : base(resource)
         { }
