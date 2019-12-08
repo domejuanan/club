@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using club.Services;
 using club.Resources;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
 
 namespace club.Controllers
@@ -51,7 +50,7 @@ namespace club.Controllers
         {
             var response = await _memberService.GetAsync(id);
 
-            if (!response.Success && response.Error.status == 404)
+            if (!response.Success && response.Error.Status == 404)
                 return NotFound(response.Error);
 
             if (!response.Success)
@@ -95,7 +94,7 @@ namespace club.Controllers
         {
             var response = await _memberService.UpdateAsync(id, saveResource);
 
-            if (!response.Success && response.Error.status == 404)
+            if (!response.Success && response.Error.Status == 404)
                 return NotFound(response.Error);
 
             if (!response.Success)
@@ -111,20 +110,20 @@ namespace club.Controllers
         /// <returns>Response for the request.</returns>
         [Authorize]
         [HttpDelete("{id}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(MemberResource), 200)]
         [ProducesResponseType(typeof(ErrorResource), 404)]
         [ProducesResponseType(typeof(ErrorResource), 400)]
         public async Task<IActionResult> DeleteAsync(int id)
         {
             var result = await _memberService.DeleteAsync(id);
 
-            if (!result.Success && result.Error.status == 404)
+            if (!result.Success && result.Error.Status == 404)
                 return NotFound(result.Error);
 
             if (!result.Success)
                 return BadRequest(result.Error);
 
-            return NoContent();
+            return Ok(result.Result);
         }
     }
 }

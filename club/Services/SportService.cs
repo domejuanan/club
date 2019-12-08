@@ -84,7 +84,7 @@ namespace club.Services
 
             var existingItemWithName = await _sportRepository.FindByName(sportSaveResource.Name);
 
-            if (existingItemWithName.Id != id)
+            if (existingItemWithName != null && existingItemWithName.Id != id)
                 return new SportResponse(400, "Item already exists", "Name", "Sport name is taken");
 
             existingItem.Name = sportSaveResource.Name;

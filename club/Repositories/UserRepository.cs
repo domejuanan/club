@@ -13,7 +13,7 @@ namespace club.Repositories
         Task<IEnumerable<User>> ListAsync(int pageNum = 0, int pageSize = 0);
         Task AddAsync(User user);
         Task<User> FindByIdAsync(int id);
-        Task<User> FindByUsername(string username);
+        Task<User> FindByEmail(string email);
         void Update(User user);
         void Remove(User user);
     }
@@ -49,9 +49,9 @@ namespace club.Repositories
             return await _context.Users.FindAsync(id);
         }
 
-        public async Task<User> FindByUsername(string username)
+        public async Task<User> FindByEmail(string email)
         {
-            return await _context.Users.Where(x => x.Username == username).FirstOrDefaultAsync();
+            return await _context.Users.Where(x => x.Email == email).FirstOrDefaultAsync();
         }
 
         public void Update(User user)

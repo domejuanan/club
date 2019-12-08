@@ -11,7 +11,7 @@ namespace club.Services
 {
     public interface IUserService
     {
-        Task<UserResponse> Authenticate(string username, string password);
+        Task<UserResponse> Authenticate(string email, string password);
         Task<UserListResponse> GetAll(int pageNum = 1, int pageSize = 50);
         Task<UserResponse> GetById(int id);
         Task<UserResponse> Create(UserSaveResource userSave);
@@ -30,12 +30,12 @@ namespace club.Services
             _mapper = mapper;
         }
         
-        public async Task<UserResponse> Authenticate(string username, string password)
+        public async Task<UserResponse> Authenticate(string email, string password)
         {
-            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            if (string.IsNullOrEmpty(email) || string.IsNullOrEmpty(password))
                 return null;
 
-            var userExist = await _userRepository.FindByUsername(username);
+            var userExist = await _userRepository.FindByEmail(email);
 
             // check if username exists
             if (userExist == null)
@@ -97,10 +97,10 @@ namespace club.Services
             if (string.IsNullOrWhiteSpace(userSave.Password))
                 return new UserResponse(400, "Password required", "Password", "Password is required.");
 
-            var userExist = await _userRepository.FindByUsername(userSave.Username);
+            var userExist = await _userRepository.FindByEmail(userSave.Email);
 
             if (userExist != null)
-                return new UserResponse(400, "User already exists", "Username", "Username \"" + userSave.Username + "\" is already taken");
+                return new UserResponse(400, "User already exists", "Email", "Email " + userSave.Email + " is already taken");
 
             try
             {
@@ -142,19 +142,19 @@ namespace club.Services
             if (userExist == null)
                 return new UserResponse(404, "User id not found", "Id", "User not found.");
 
-            if (userExist.Username != user.Username)
+            if (userExist.Email != user.Email)
             {
-                var userExistUsername = await _userRepository.FindByUsername(user.Username);
+                var userExistUsername = await _userRepository.FindByEmail(user.Email);
 
                 // username has changed so check if the new username is already taken
                 if (userExistUsername != null)
-                    return new UserResponse(400, "User already exists", "Username", "Username \"" + user.Username + "\" is already taken");
+                    return new UserResponse(400, "User already exists", "Username", "Email " + user.Email + " is already taken");
             }
 
             // update user properties
             userExist.FirstName = user.FirstName;
             userExist.LastName = user.LastName;
-            userExist.Username = user.Username;
+            userExist.Email = user.Email;
 
             try
             {

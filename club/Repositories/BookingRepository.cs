@@ -15,7 +15,8 @@ namespace club.Repositories
         Task AddAsync(Booking booking);
         Task<Booking> FindByIdAsync(int id);
         Task<List<Booking>> ListBookings(DateTime day, int pageNum = 1, int pageSize = 50);
-        Task<List<Booking>> GetBookings(DateTime startDate, DateTime endDate, int memberId = 0, int courtId = 0);
+        Task<List<Booking>> GetBookingsOfHour(DateTime dateTime, int memberId = 0, int courtId = 0);
+        Task<List<Booking>> GetBookingsOfDate(DateTime date, int memberId = 0, int courtId = 0);
         void Update(Booking booking);
         void Remove(Booking booking);
         List<String> GetHourSlots();
@@ -32,11 +33,7 @@ namespace club.Repositories
 
         public async Task<int> CountDayBookingsAsync(DateTime date)
         {
-            DateTime startDate = new DateTime(date.Year, date.Month, date.Day, 0, 0, 0);
-            DateTime endDate = new DateTime(date.Year, date.Month, date.Day, 23, 59, 59);
-
-            _context.Bookings.Where(b => b.DateTime >= startDate && b.DateTime <= endDate);
-
+            _context.Bookings.Where(b => b.Reservation == date.Date);
             return await _context.Bookings.CountAsync();
         }
         
@@ -48,47 +45,57 @@ namespace club.Repositories
 
         public async Task<List<Booking>> ListBookings(DateTime day, int pageNum = 1, int pageSize = 50)
         {
-            int skip = (pageNum - 1) * pageSize;
-                     
+            int skip = (pageNum - 1) * pageSize;            
+            IQueryable<Booking> q = _context.Bookings;
+            
             if (day != default)
-            {
-                DateTime startDate = new DateTime(day.Year, day.Month, day.Day, 0, 0, 0);
-                DateTime endDate = new DateTime(day.Year, day.Month, day.Day, 23, 59, 59);
+                q = q.Where(b => b.Reservation == day.Date);
 
-                _context.Bookings.Where(b => b.DateTime >= startDate && b.DateTime <= endDate);
-            }
-
-            return await _context.Bookings
-                .Include(b => b.Member)
+            return await q.Include(b => b.Member)
                 .Include(b => b.Court)
                 .ThenInclude(c => c.Sport)
                 .Skip(skip)
                 .Take(pageSize)
                 .AsNoTracking()
                 .ToListAsync();
+
         }
 
-        public async Task<List<Booking>> GetBookings(DateTime startDate, DateTime endDate, int memberId = 0, int courtId = 0)
+        public async Task<List<Booking>> GetBookingsOfHour(DateTime dateTime, int memberId = 0, int courtId = 0)
         {
-            if (memberId > 0)            
-                _context.Bookings.Where(b => b.MemberId == memberId);
+            IQueryable<Booking> q = _context.Bookings;
 
-            if (courtId > 0)            
-                _context.Bookings.Where(b => b.CourtId == courtId);
+            if (memberId > 0)
+                q = q.Where(b => b.MemberId == memberId);
 
-            if (startDate != default && endDate != default)
-            {
-                startDate = new DateTime(startDate.Year, startDate.Month, startDate.Day, 0, 0, 0);
-                endDate = new DateTime(endDate.Year, endDate.Month, endDate.Day, 23, 59, 59);
+            if (courtId > 0)
+                q = q.Where(b => b.CourtId == courtId);
 
-                _context.Bookings.Where(b => b.DateTime >= startDate && b.DateTime <= endDate);
-            }                
-
-            return await _context.Bookings      
-                .AsNoTracking()
+            if (dateTime != default)
+                q = q.Where(b => b.Reservation.Date == dateTime.Date && b.Reservation.Hour == dateTime.Hour);
+            
+            return await q.AsNoTracking()
                 .ToListAsync();
         }
-        
+
+        public async Task<List<Booking>> GetBookingsOfDate(DateTime date, int memberId = 0, int courtId = 0)
+        {
+            IQueryable<Booking> q = _context.Bookings;
+
+            if (memberId > 0)
+                q = q.Where(b => b.MemberId == memberId);
+
+            if (courtId > 0)
+                q = q.Where(b => b.CourtId == courtId);
+
+            if (date != default)
+                _context.Bookings.Where(b => b.Reservation == date.Date);
+
+            return await q.AsNoTracking()
+                .ToListAsync();
+        }
+
+
         public async Task<Booking> FindByIdAsync(int id)
         {
             return await _context.Bookings
