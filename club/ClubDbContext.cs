@@ -17,24 +17,28 @@ namespace club.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<Sport>().ToTable("Sports");
             modelBuilder.Entity<Sport>().HasKey(p => p.Id);
-            modelBuilder.Entity<Sport>().Property(p => p.Id).IsRequired().ValueGeneratedOnAdd();
+            modelBuilder.Entity<Sport>().Property(p => p.Id).IsRequired();
             modelBuilder.Entity<Sport>().Property(p => p.Name).IsRequired().HasMaxLength(100);
-            modelBuilder.Entity<Sport>().HasMany(p => p.Courts);
+            modelBuilder.Entity<Sport>().HasMany(p => p.Courts).WithOne(p => p.Sport).HasForeignKey(p => p.SportId).OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<Member>().ToTable("Members");
+            modelBuilder.Entity<Member>().HasKey(p => p.Id);
+            modelBuilder.Entity<Member>().Property(p => p.Name).IsRequired().HasMaxLength(255);
+            modelBuilder.Entity<Member>().Property(p => p.Surname).IsRequired().HasMaxLength(255);
+            modelBuilder.Entity<Member>().Property(p => p.Phone).IsRequired().HasMaxLength(20);
+            modelBuilder.Entity<Member>().Property(p => p.Address).IsRequired().HasMaxLength(255);
+            modelBuilder.Entity<Member>().HasMany(p => p.Bookings).WithOne(p => p.Member).HasForeignKey(p => p.MemberId).OnDelete(DeleteBehavior.Cascade);
 
-            //modelBuilder.Entity<Court>()                
-            //    .HasOne<Sport>(s => s.Sport)
-            //    .WithMany(c => c.Courts)
-            //    .HasForeignKey(s => s.SportId)
-            //    .OnDelete(DeleteBehavior.Cascade);
+            modelBuilder.Entity<Court>().ToTable("Courts");
+            modelBuilder.Entity<Court>().HasKey(p => p.Id);
+            modelBuilder.Entity<Court>().Property(p => p.Reference).IsRequired().HasMaxLength(20);
+            modelBuilder.Entity<Court>().Property(p => p.SportId).IsRequired();
+            modelBuilder.Entity<Court>().HasMany(p => p.Bookings).WithOne(p => p.Court).HasForeignKey(p => p.CourtId).OnDelete(DeleteBehavior.Cascade);
 
-            //modelBuilder.Entity<Booking>()
-            //    .HasOne<Court>(c => c.Court);
-
-            //modelBuilder.Entity<Booking>()
-            //    .HasOne<Member>(m => m.Member);
         }
     }
 }

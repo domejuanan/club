@@ -27,9 +27,9 @@ namespace club.Controllers
         [ProducesResponseType(typeof(CourtAvailableListResource), 200)]
         [ProducesResponseType(typeof(ErrorResource), 404)]
         [ProducesResponseType(typeof(ErrorResource), 400)]
-        public async Task<IActionResult> Availability(string dateTimeString, int sportId, int memberId, int pageNum = 1, int pageSize = 50)
+        public async Task<IActionResult> Availability(string date, int sportId, int memberId, int pageNum = 1, int pageSize = 50)
         {
-            var response = await _availabilityService.Availability(dateTimeString, sportId, memberId, pageNum, pageSize);
+            var response = await _availabilityService.Availability(date, sportId, memberId, pageNum, pageSize);
 
             if (!response.Success && response.Error.Status == 404)
                 return NotFound(response.Error);

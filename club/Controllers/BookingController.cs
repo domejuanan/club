@@ -2,7 +2,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using club.Services;
 using club.Resources;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Authorization;
 
 namespace club.Controllers
@@ -24,7 +23,7 @@ namespace club.Controllers
         /// </summary>
         /// <returns>List os bookings.</returns>
         [Authorize]
-        [HttpGet("byDate")]
+        [HttpGet("byDate/{date}")]
         [ProducesResponseType(typeof(BookingListResource), 200)]
         [ProducesResponseType(typeof(ErrorResource), 400)]
         public async Task<IActionResult> ListOfDAteAsync(string date, int pageNum = 1, int pageSize = 50)
@@ -132,7 +131,7 @@ namespace club.Controllers
         /// <returns>Response for the request.</returns>
         [Authorize]
         [HttpDelete("{id}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(BookingResource), 200)]
         [ProducesResponseType(typeof(ErrorResource), 404)]
         [ProducesResponseType(typeof(ErrorResource), 400)]
         public async Task<IActionResult> DeleteAsync(int id)
@@ -145,7 +144,7 @@ namespace club.Controllers
             if (!result.Success)
                 return BadRequest(result.Error);
 
-            return NoContent();
+            return Ok(result.Result);
         }
     }
 }

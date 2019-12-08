@@ -55,7 +55,7 @@ namespace club.Repositories
 
         public async Task<Sport> FindByName(string name)
         {
-            return await _context.Sports.SingleOrDefaultAsync(x => x.Name == name);
+            return await _context.Sports.Where(x => x.Name == name).SingleOrDefaultAsync();
         }
 
         public void Update(Sport sport)

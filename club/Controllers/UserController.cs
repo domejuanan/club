@@ -10,7 +10,6 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using club.Services;
 using club.Resources;
-using Microsoft.AspNetCore.Http;
 
 namespace club.Controllers
 {
@@ -161,7 +160,7 @@ namespace club.Controllers
         /// <returns>Response for the request.</returns>
         [Authorize]
         [HttpDelete("{id}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(UserResource), 200)]
         [ProducesResponseType(typeof(ErrorResource), 404)]
         [ProducesResponseType(typeof(ErrorResource), 400)]
         public async Task<IActionResult> Delete(int id)
@@ -174,7 +173,7 @@ namespace club.Controllers
             if (!response.Success)
                 return BadRequest(response.Error);
 
-            return NoContent();
+            return Ok(response.Result);
         }
     }
 }

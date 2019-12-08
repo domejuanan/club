@@ -13,7 +13,7 @@ namespace club.Services
 {
     public interface IAvailabilityService
     {        
-        Task<CourtAvailableListResponse> Availability(string dateTimeString, int sportId, int memberId, int pageNum = 1, int pageSize = 50);
+        Task<CourtAvailableListResponse> Availability(string dateString, int sportId, int memberId, int pageNum = 1, int pageSize = 50);
     }
 
     public class AvailabilityService : IAvailabilityService
@@ -34,7 +34,7 @@ namespace club.Services
             _mapper = mapper;
         }
 
-        public async Task<CourtAvailableListResponse> Availability(string dateTimeString, int sportId, int memberId, int pageNum = 1, int pageSize = 50)
+        public async Task<CourtAvailableListResponse> Availability(string dateString, int sportId, int memberId, int pageNum = 1, int pageSize = 50)
         {
             var sport = await _sportRepository.FindByIdAsync(sportId);
 
@@ -48,31 +48,28 @@ namespace club.Services
 
             DateTime dateTime = default;
 
-            if (!String.IsNullOrWhiteSpace(dateTimeString) && !DateTime.TryParse(dateTimeString, out dateTime))
+            if (!String.IsNullOrWhiteSpace(dateString) && !DateTime.TryParse(dateString, out dateTime))
             {
-                return new CourtAvailableListResponse(400, "Wrong date format", "dateTimeString", "dateTimeString format has to be: yyyy-MM-ddTHH:mm:ss");
+                return new CourtAvailableListResponse(400, "Wrong date format", "date", "Date format has to be: yyyy-MM-dd");
             }
 
             if (dateTime < DateTime.Today)
-                return new CourtAvailableListResponse(400, "Bad booking time", "DateTime", "DateTime is older than today");
+                return new CourtAvailableListResponse(400, "Bad booking time", "date", "Date is older than today");
 
-            DateTime dayStartDate = new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, 8, 0, 0);
-            DateTime dayEndDate = new DateTime(dateTime.Year, dateTime.Month, dateTime.Day, 22, 0, 0);
-
-            var bookingsOfMember = await _bookingRepository.GetBookings(dayStartDate, dayEndDate, memberId);
+            var bookingsOfMember = await _bookingRepository.GetBookingsOfDate(dateTime, memberId);
 
             if (bookingsOfMember.Count == 3)
                 return new CourtAvailableListResponse(400, "Too many bookings", "MemberId", "A member only is allowed to book 3 courts per day");
 
-            var bookingsOfMemberHour = await _bookingRepository.GetBookings(dateTime, dateTime, memberId);
+            var bookingsOfMemberHour = await _bookingRepository.GetBookingsOfHour(dateTime, memberId);
 
             if (bookingsOfMemberHour.Count == 2)
                 return new CourtAvailableListResponse(400, "Too many bookings", "MemberId", "A member only is allowed to book 2 courts at the same hour");
 
-            var todayBookings = await _bookingRepository.GetBookings(dayStartDate, dayEndDate);
+            var todayBookings = await _bookingRepository.GetBookingsOfDate(dateTime);
 
             var hoursByCourt = todayBookings.GroupBy(b => b.CourtId)
-                .ToDictionary(k => k.Key, v => v.Select(f => f.DateTime.ToString("HH:mm")).ToList());
+                .ToDictionary(k => k.Key, v => v.Select(f => f.Reservation.ToString("HH:mm")).ToList());
 
             
             var allCourts = await _courtRepository.ListAsync(pageNum, pageSize);
