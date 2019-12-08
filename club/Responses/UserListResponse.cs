@@ -2,7 +2,7 @@
 
 namespace club.Responses
 {
-    public class UserListResponse : BaseListResponse<UserListResource>
+    public class UserListResponse : BaseResponse<UserListResource>
     {
         public UserListResponse(UserListResource resource) : base(resource)
         { }
